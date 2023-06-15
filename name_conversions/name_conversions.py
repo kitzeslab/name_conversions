@@ -5,7 +5,7 @@ import importlib.resources
 import numpy as np
 import pandas as pd
 
-with importlib.resources.path("opensoundscape.resources", "species_table.csv") as f:
+with importlib.resources.path("name_conversions.resources", "species_table.csv") as f:
     species_table = pd.read_csv(f)
 
 
