@@ -103,38 +103,53 @@ def alpha_to_sci(alpha, alpha_type="ibp"):
         raise ValueError("alpha_type must be 'bbl' or 'ibp'")
 
 
-def common_to_alpha(common, alpha_type="ibp"):
+def common_to_alpha(common, alpha_type="ibp", flexible_match=True):
     """convert common name to alpha code; use BBL or IBP alpha codes
 
     Common name must match case and syntax exactly, for instance "Red-necked Grebe"
 
     Args:
         common: common name
+            Note: if flexible_match is False, case and syntax must match
+            exactly, for instance "Red-necked Grebe"
         alpha_type: 'bbl' or 'ibp'
+        flexible_match: if True, case and syntax of `common` are ignored
+            (converts `common` to lowercase letters only string)
+
     """
-    if alpha_type == "bbl":
-        return bbl_alpha_com_idx.at[common, "true_alpha"]
-    elif alpha_type == "ibp":
-        return ibp_alpha_com_idx.at[common, "true_alpha"]
+    import re
+
+    assert alpha_type.lower() in ("bbl", "ibp"), "alpha_type must be 'bbl' or 'ibp'"
+    table = bbl_alpha_com_idx if alpha_type.lower() == "bbl" else ibp_alpha_com_idx
+
+    if flexible_match:
+        common = re.sub("[^a-zA-Z]", "", common).lower()
+
+        idx = table.index.str.replace("[^a-zA-Z]", "", regex=True).str.lower()
+        return table.iloc[idx.get_loc(common)]["true_alpha"]
     else:
-        raise ValueError("alpha_type must be 'bbl' or 'ibp'")
+        return table.at[common, "true_alpha"]
 
 
-def sci_to_alpha(sci, alpha_type="ibp"):
+def sci_to_alpha(sci, alpha_type="ibp", flexible_match=True):
     """convert scientific name to alpha code; use BBL or IBP alpha codes
 
     Args:
         sci: scientific name
-            Note: converts "-" to space, first letter to uppercase, and rest to lowercase
-            This assists in matching the format "Genus species" eg "Crux crux"
+            Note: if flexible_match is False, must match string exactly,
+            for instance "Bubo virginianus"
         alpha_type: 'bbl' or 'ibp'
+        flexible_match: if True, converts "-" to space, first letter to uppercase,
+            and rest to lowercase.
+            This assists in matching the format "Genus species" eg "Crux crux"
+            default: True
     """
-    sci = sci.replace("-", " ")
-    sci = sci[0].upper() + sci[1:].lower()
+    assert alpha_type.lower() in ("bbl", "ibp"), "alpha_type must be 'bbl' or 'ibp'"
 
-    if alpha_type == "bbl":
-        return bbl_alpha_sci_idx.at[sci, "true_alpha"]
-    elif alpha_type == "ibp":
-        return ibp_alpha_sci_idx.at[sci, "true_alpha"]
-    else:
-        raise ValueError("alpha_type must be 'bbl' or 'ibp'")
+    table = bbl_alpha_sci_idx if alpha_type.lower() == "bbl" else ibp_alpha_sci_idx
+
+    if flexible_match:
+        sci = sci.replace("-", " ")
+        sci = sci[0].upper() + sci[1:].lower()
+
+    return table.at[sci, "true_alpha"]
