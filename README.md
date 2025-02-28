@@ -7,7 +7,7 @@ Or, use the tables of name equivalence from `/resources` directly.
 ```python
 import name_conversions
 scientific = name_conversions.alpha_to_sci('NOCA') #also works with 'noca'
-alpha = name_conversions.common_to_alpha('Cardinalis cardinalis') #also works with "cardinalis-cardinalis"
+alpha = name_conversions.sci_to_alpha('Cardinalis cardinalis') #also works with "cardinalis-cardinalis"
 common = name_conversions.alpha_to_common('NOCA')
 #etc
 ```
@@ -24,7 +24,12 @@ common = name_conversions.alpha_to_common('NOCA')
  'sci_to_xc_common',
  'xc_common_to_sci'
  'get_species_list',
+ 'ebird_to_sci',
+ 'ebird_to_common',
+ 'sci_to_ebird',
+ 'common_to_ebird',
+ 'switch_ebird_taxonomy_year'
 ```
 
 ## Installation
-Clone this repository then run `pip install /path/to/cloned/name_conversions` in the command line in your Python environment. 
+`pip install git+https://github.com/kitzeslab/name_conversions.git`
