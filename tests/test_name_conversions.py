@@ -1,4 +1,5 @@
 import name_conversions
+import pytest
 
 
 def test_get_species_list():
@@ -60,3 +61,22 @@ def test_sci_to_alpha():
     for scientific in ("Cardinalis cardinalis", "cardinalis-cardinalis"):
         assert name_conversions.sci_to_alpha(scientific, "bbl") == alpha
         assert name_conversions.sci_to_alpha(scientific, "ibp") == alpha
+
+
+def test_ebird_to_sci():
+    ebird_code = "norcar"
+    assert name_conversions.ebird_to_sci(ebird_code) == "Cardinalis cardinalis"
+
+
+def test_ebird_to_common():
+    ebird_code = "norcar"
+    assert name_conversions.ebird_to_common(ebird_code) == "Northern Cardinal"
+
+
+def test_switch_ebird_taxonomy_year():
+    """blttro2 is not in 2023 taxonomy, but is in 2022"""
+    name_conversions.switch_ebird_taxonomy_year(2023)
+    with pytest.raises(KeyError):
+        name_conversions.ebird_to_sci("blttro2")
+    name_conversions.switch_ebird_taxonomy_year(2022)
+    name_conversions.ebird_to_sci("blttro2")

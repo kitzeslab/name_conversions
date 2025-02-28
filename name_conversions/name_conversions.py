@@ -1,9 +1,12 @@
 """a set of utilites for converting between scientific and common names of bird species in different
 naming systems (xeno canto and bird net)"""
+
 import importlib.resources
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
+from glob import glob
 
 with importlib.resources.path("name_conversions.resources", "species_table.csv") as f:
     species_table = pd.read_csv(f)
@@ -17,6 +20,24 @@ with importlib.resources.path(
     "name_conversions.resources", "ibp-alpha-codes_2021.csv"
 ) as f:
     ibp_alpha = pd.read_csv(f)
+
+with importlib.resources.path(
+    "name_conversions.resources", "ebird_taxonomy_v2024.csv"
+) as f:
+    ebird_taxonomy = pd.read_csv(f).set_index("SPECIES_CODE", drop=True)
+
+
+def switch_ebird_taxonomy_year(year):
+    """switch the reference taxonomy to a different year"""
+    global ebird_taxonomy
+    p = importlib.resources.path(
+        "name_conversions.resources", f"eBird_taxonomy_v{year}.csv"
+    )
+    assert Path(
+        p
+    ).exists(), f"eBird taxonomy for {year} does not exist. Available taxonomies are: {glob('./ebird_taxonomy_v*')}"
+    with open(p, "r") as f:
+        ebird_taxonomy = pd.read_csv(f).set_index("SPECIES_CODE", drop=True)
 
 
 def get_species_list():
@@ -39,6 +60,29 @@ ibp_alpha_sci_idx = ibp_alpha.set_index("scientific_name", drop=True)
 bbl_alpha_sci_idx = bbl_alpha.set_index("scientific_name", drop=True)
 ibp_alpha_com_idx = ibp_alpha.set_index("common_name", drop=True)
 bbl_alpha_com_idx = bbl_alpha.set_index("common_name", drop=True)
+ebird_taxonomy_sci_idx = ebird_taxonomy.set_index("SCI_NAME", drop=False)
+ebird_taxonomy_com_idx = ebird_taxonomy.set_index("PRIMARY_COM_NAME", drop=False)
+
+
+# ebird columns: SPECIES_CODE	TAXON_CONCEPT_ID	PRIMARY_COM_NAME	SCI_NAME
+def ebird_to_sci(ebird_code):
+    """convert ebird species code to scientific name"""
+    return ebird_taxonomy.at[ebird_code, "SCI_NAME"]
+
+
+def ebird_to_common(ebird_code):
+    """convert ebird species code to common name"""
+    return ebird_taxonomy.at[ebird_code, "PRIMARY_COM_NAME"]
+
+
+def sci_to_ebird(sci):
+    """convert scientific name to ebird species code"""
+    return ebird_taxonomy_sci_idx.at[sci, "SPECIES_CODE"]
+
+
+def common_to_ebird(common):
+    """convert common name to ebird species code"""
+    return ebird_taxonomy_com_idx.at[common, "SPECIES_CODE"]
 
 
 def sci_to_bn_common(scientific):

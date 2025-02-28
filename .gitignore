@@ -2,3 +2,4 @@ name_conversions/__pycache__/
 .DS_Store
 name_conversions/**/__pycache__/
 tests/__pycache__/
+.vscode/settings.json
