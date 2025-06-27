@@ -30,12 +30,13 @@ with importlib.resources.path(
 def switch_ebird_taxonomy_year(year):
     """switch the reference taxonomy to a different year"""
     global ebird_taxonomy
-    p = importlib.resources.path(
-        "name_conversions.resources", f"eBird_taxonomy_v{year}.csv"
-    )
-    assert Path(
-        p
-    ).exists(), f"eBird taxonomy for {year} does not exist. Available taxonomies are: {glob('./ebird_taxonomy_v*')}"
+    taxonomies_path = importlib.resources.files("name_conversions.resources")
+    available_taxonomies = taxonomies_path.glob("eBird_taxonomy_v*.csv")
+    p = taxonomies_path / f"eBird_taxonomy_v{year}.csv"
+    if not p.exists():
+        raise FileNotFoundError(
+            f"eBird taxonomy for {year} does not exist. Available taxonomies are: {available_taxonomies}"
+        )
     with open(p, "r") as f:
         ebird_taxonomy = pd.read_csv(f).set_index("SPECIES_CODE", drop=True)
 

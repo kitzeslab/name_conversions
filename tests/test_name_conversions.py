@@ -80,3 +80,6 @@ def test_switch_ebird_taxonomy_year():
         name_conversions.ebird_to_sci("blttro2")
     name_conversions.switch_ebird_taxonomy_year(2022)
     name_conversions.ebird_to_sci("blttro2")
+
+    with pytest.raises(FileNotFoundError):
+        name_conversions.switch_ebird_taxonomy_year(2000)
